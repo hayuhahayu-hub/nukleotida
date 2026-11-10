@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nukleotida Interaktif</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #e0f7fa 0%, #e8eaf6 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #263238;
+  }
+  h1 {
+    text-align: center;
+    color: #1A237E;
+    margin-bottom: 8px;
+    font-size: 28px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #546E7A;
+    font-style: italic;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    gap: 20px;
+  }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  .card h2 {
+    color: #1A237E;
+    font-size: 18px;
+    margin-bottom: 12px;
+    border-left: 4px solid #FFB74D;
+    padding-left: 10px;
+  }
+  .canvas-wrap {
+    position: relative;
+    width: 100%;
+    background: #FAFAFA;
+    border-radius: 12px;
+    border: 2px dashed #B0BEC5;
+  }
+  svg { display: block; width: 100%; height: auto; }
+
+  /* Tooltip */
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: #263238;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    max-width: 260px;
+    line-height: 1.4;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  }
+  #tooltip.show { opacity: 1; }
+  #tooltip b { color: #FFD54F; }
+
+  /* Interactive elements */
+  .hoverable {
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .hoverable:hover {
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(255,152,0,0.6));
+    transform: scale(1.02);
+    transform-origin: center;
+  }
+
+  /* Info panel */
+  .info-panel {
+    background: #FFF8E1;
+    border-left: 5px solid #FFB74D;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-top: 10px;
+    min-height: 60px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .info-panel.empty {
+    color: #90A4AE;
+    font-style: italic;
+  }
+  .info-panel b { color: #E65100; }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1.5px solid #37474F;
+  }
+
+  /* H-bond diagram */
+  .hbond-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  @media (max-width: 700px) {
+    .hbond-row { grid-template-columns: 1fr; }
+  }
+
+  .pulse {
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🧬 Nukleotida Interaktif</h1>
+<p class="subtitle">Hover / klik tiap bagian untuk tahu penjelasannya</p>
+
+<div class="container">
+
+  <!-- ============ NUKLEOTIDA ============ -->
+  <div class="card">
+    <h2>1️⃣ Satu Nukleotida Utuh</h2>
+    <div class="canvas-wrap">
+      <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Garis penghubung fosfat-gula -->
+        <line id="bond-pg" x1="220" y1="170" x2="320" y2="170"
+              stroke="#37474F" stroke-width="5"
+              class="hoverable"
+              data-info="<b>Ikatan Fosfodiester (fosfat–gula)</b><br>Menghubungkan gugus fosfat dengan gula pentosa. Fosfat terikat pada atom C5 gula. Ini adalah ikatan yang menyambung nukleotida satu dengan lainnya (backbone)." />
+
+        <!-- Garis penghubung gula-basa -->
+        <line id="bond-gb" x1="500" y1="170" x2="620" y2="170"
+              stroke="#37474F" stroke-width="5"
+              class="hoverable"
+              data-info="<b>Ikatan Glikosidik (gula–basa)</b><br>Menghubungkan gula pentosa dengan basa nitrogen. Basa menempel di atom C1 gula. Ikatan ini penting untuk kestabilan nukleotida." />
+
+        <!-- FOSFAT -->
+        <g class="hoverable"
+           data-info="<b>Fosfat (P)</b><br>• Terdiri dari atom P dan O (misal HPO₄²⁻)<br>• <b>Bermuatan negatif</b> → membuat DNA bersifat negatif<br>• Menempel di C5 gula pentosa<br>• Berperan penting di elektroforesis DNA">
+          <circle cx="160" cy="170" r="70" fill="#FFB74D" stroke="#37474F" stroke-width="3"/>
+          <text x="160" y="160" text-anchor="middle" font-size="42" font-weight="bold" fill="#263238">P</text>
+          <text x="160" y="195" text-anchor="middle" font-size="14" fill="#263238">O⁻</text>
+          <text x="160" y="270" text-anchor="middle" font-size="16" font-weight="bold" fill="#263238">Fosfat</text>
+          <text x="160" y="290" text-anchor="middle" font-size="11" fill="#546E7A" font-style="italic">(bermuatan negatif)</text>
+        </g>
+
+        <!-- GULA PENTOSA -->
+        <g class="hoverable"
+           data-info="<b>Gula Pentosa</b><br>• 'Penta' = lima atom karbon (C1–C5)<br>• Bentuk cincin segi lima dengan atom O di dalamnya<br>• C1 = tempat basa menempel<br>• C5 = tempat fosfat menempel<br>• <b>Jenisnya:</b> deoksiribosa (DNA) / ribosa (RNA)">
+          <!-- pentagon: pusat (410,170) radius 85, menghadap ke kanan -->
+          <polygon points="410,90 495,132 475,225 345,225 325,132"
+                   fill="#81C784" stroke="#37474F" stroke-width="3"/>
+          <text x="410" y="175" text-anchor="middle" font-size="22" font-weight="bold" fill="#1B5E20">O</text>
+          <!-- Label karbon -->
+          <text x="410" y="80" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">C5</text>
+          <text x="510" y="130" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">C4</text>
+          <text x="495" y="240" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">C3</text>
+          <text x="325" y="240" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">C2</text>
+          <text x="310" y="130" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">C1</text>
+          <text x="410" y="270" text-anchor="middle" font-size="16" font-weight="bold" fill="#263238">Gula Pentosa</text>
+          <text x="410" y="290" text-anchor="middle" font-size="11" fill="#546E7A" font-style="italic">(ribosa / deoksiribosa)</text>
+        </g>
+
+        <!-- BASA NITROGEN -->
+        <g class="hoverable"
+           data-info="<b>Basa Nitrogen</b><br>• Bagian yang <b>berbeda</b> antar nukleotida<br>• DNA: A, T, G, C<br>• RNA: A, U, G, C<br>• Menempel di C1 gula pentosa<br>• <b>Purina:</b> A, G (cincin ganda) <br>• <b>Pirimidina:</b> T, C, U (cincin tunggal)">
+          <rect x="620" y="100" width="150" height="140" rx="12"
+                fill="#64B5F6" stroke="#37474F" stroke-width="3"/>
+          <text x="695" y="160" text-anchor="middle" font-size="20" font-weight="bold" fill="#0D47A1">BASA</text>
+          <text x="695" y="190" text-anchor="middle" font-size="20" font-weight="bold" fill="#0D47A1">N</text>
+          <text x="695" y="270" text-anchor="middle" font-size="16" font-weight="bold" fill="#263238">Basa Nitrogen</text>
+          <text x="695" y="290" text-anchor="middle" font-size="11" fill="#546E7A" font-style="italic">(A / T / G / C / U)</text>
+        </g>
+
+      </svg>
+    </div>
+    <div id="info1" class="info-panel empty">💡 Hover atau klik bagian nukleotida untuk penjelasan…</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#FFB74D"></div>Fosfat</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#81C784"></div>Gula Pentosa</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#64B5F6"></div>Basa Nitrogen</div>
+    </div>
+  </div>
+
+  <!-- ============ RIBOSA vs DEOKSIRIBOSA ============ -->
+  <div class="card">
+    <h2>2️⃣ Beda Ribosa vs Deoksiribosa — Kunci di C2</h2>
+    <div class="canvas-wrap">
+      <svg viewBox="0 0 900 300" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- ===== RIBOSA (kiri) ===== -->
+        <g class="hoverable"
+           data-info="<b>Ribosa (RNA)</b><br>• Gula pentosa pada RNA<br>• Gugus di <b>C2 = OH (hidroksil)</b><br>• Ada atom oksigen di C2<br>• Lebih reaktif → RNA kurang stabil dari DNA">
+          <polygon points="200,60 285,100 265,190 135,190 115,100"
+                   fill="#81C784" stroke="#37474F" stroke-width="3"/>
+          <text x="200" y="145" text-anchor="middle" font-size="20" font-weight="bold" fill="#1B5E20">O</text>
+          <text x="200" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">C5</text>
+          <text x="295" y="100" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">C4</text>
+          <text x="285" y="210" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">C3</text>
+          <text x="115" y="210" text-anchor="middle" font-size="12" font-weight="bold" fill="#C62828">C2</text>
+          <text x="100" y="100" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">C1</text>
+          <!-- Gugus OH di C2 -->
+          <line x1="135" y1="190" x2="135" y2="235" stroke="#C62828" stroke-width="3"/>
+          <text x="135" y="255" text-anchor="middle" font-size="20" font-weight="bold" fill="#C62828">OH</text>
+          <text x="200" y="285" text-anchor="middle" font-size="15" font-weight="bold" fill="#1B5E20">Ribosa (RNA)</text>
+        </g>
+
+        <!-- PEMISAH -->
+        <line x1="450" y1="20" x2="450" y2="280" stroke="#CFD8DC" stroke-width="2" stroke-dasharray="6 4"/>
+
+        <!-- ===== DEOKSIRIBOSA (kanan) ===== -->
+        <g class="hoverable"
+           data-info="<b>Deoksiribosa (DNA)</b><br>• Gula pentosa pada DNA<br>• Gugus di <b>C2 = H</b> (oksigen dihilangkan)<br>• Kata 'deoksi' = tanpa oksigen<br>• Lebih stabil → cocok jadi penyimpan info genetik jangka panjang">
+          <polygon points="650,60 735,100 715,190 585,190 565,100"
+                   fill="#4FC3F7" stroke="#37474F" stroke-width="3"/>
+          <text x="650" y="145" text-anchor="middle" font-size="20" font-weight="bold" fill="#0D47A1">O</text>
+          <text x="650" y="50" text-anchor="middle" font-size="12" font-weight="bold" fill="#0D47A1">C5</text>
+          <text x="745" y="100" text-anchor="middle" font-size="12" font-weight="bold" fill="#0D47A1">C4</text>
+          <text x="735" y="210" text-anchor="middle" font-size="12" font-weight="bold" fill="#0D47A1">C3</text>
+          <text x="565" y="210" text-anchor="middle" font-size="12" font-weight="bold" fill="#C62828">C2</text>
+          <text x="550" y="100" text-anchor="middle" font-size="12" font-weight="bold" fill="#0D47A1">C1</text>
+          <!-- Gugus H di C2 -->
+          <line x1="585" y1="190" x2="585" y2="235" stroke="#C62828" stroke-width="3"/>
+          <text x="585" y="255" text-anchor="middle" font-size="20" font-weight="bold" fill="#C62828">H</text>
+          <text x="650" y="285" text-anchor="middle" font-size="15" font-weight="bold" fill="#0D47A1">Deoksiribosa (DNA)</text>
+        </g>
+
+      </svg>
+    </div>
+    <div id="info2" class="info-panel empty">💡 Klik gula di kiri atau kanan untuk tahu bedanya…</div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#81C784"></div>Ribosa (RNA) — C2 = OH</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4FC3F7"></div>Deoksiribosa (DNA) — C2 = H</div>
+    </div>
+  </div>
+
+  <!-- ============ IKATAN HIDROGEN ============ -->
+  <div class="card">
+    <h2>3️⃣ Ikatan Hidrogen — Perekat Antar Untai DNA</h2>
+    <p style="font-size:13px; color:#546E7A; margin-bottom:12px;">
+      Ikatan hidrogen menghubungkan basa dari dua untai DNA. <b>A–T</b> = 2 ikatan, <b>G–C</b> = 3 ikatan.
+      (Berlaku juga di RNA: A–U, G–C.) Hover/klik tiap pasangan!
+    </p>
+
+    <div class="hbond-row">
+
+      <!-- A = T -->
+      <div class="canvas-wrap" style="padding:10px;">
+        <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+
+          <text x="200" y="25" text-anchor="middle" font-size="15" font-weight="bold" fill="#1A237E">
+            Pasangan A = T (2 ikatan hidrogen)
+          </text>
+
+          <!-- Adenin (atas) -->
+          <g class="hoverable"
+             data-info="<b>Adenin (A)</b><br>Basa purina (cincin ganda).<br>Berpasangan dengan <b>Timin (T)</b> lewat <b>2 ikatan hidrogen</b>.<br>Di RNA, pasangannya adalah Urasil (U).">
+            <rect x="120" y="50" width="160" height="60" rx="8"
+                  fill="#EF9A9A" stroke="#37474F" stroke-width="2.5"/>
+            <text x="200" y="88" text-anchor="middle" font-size="22" font-weight="bold" fill="#B71C1C">
+              A (Adenin)
+            </text>
+          </g>
+
+          <!-- Ikatan hidrogen -->
+          <g class="hoverable pulse"
+             data-info="<b>2 Ikatan Hidrogen</b><br>Pasangan <b>Adenin–Timin</b> dihubungkan oleh 2 ikatan hidrogen.<br>Ikatan ini lebih <b>lemah</b> dari G–C, tapi cukup kuat untuk menjaga dua untai DNA tetap berpasangan. Mudah diputus saat replikasi (helikase).">
+            <line x1="160" y1="115" x2="160" y2="155" stroke="#37474F" stroke-width="4"
+                  stroke-dasharray="6 4"/>
+            <line x1="240" y1="115" x2="240" y2="155" stroke="#37474F" stroke-width="4"
+                  stroke-dasharray="6 4"/>
+            <!-- tanda H -->
+            <circle cx="160" cy="135" r="9" fill="#FFF176" stroke="#37474F" stroke-width="1.5"/>
+            <text x="160" y="140" text-anchor="middle" font-size="11" font-weight="bold">H</text>
+            <circle cx="240" cy="135" r="9" fill="#FFF176" stroke="#37474F" stroke-width="1.5"/>
+            <text x="240" y="140" text-anchor="middle" font-size="11" font-weight="bold">H</text>
+          </g>
+
+          <!-- Timin (bawah) -->
+          <g class="hoverable"
+             data-info="<b>Timin (T)</b><br>Basa pirimidina (cincin tunggal).<br>Berpasangan dengan <b>Adenin (A)</b> lewat <b>2 ikatan hidrogen</b>.<br>Hanya ada di DNA (di RNA digantikan Urasil).">
+            <rect x="120" y="160" width="160" height="60" rx="8"
+                  fill="#90CAF9" stroke="#37474F" stroke-width="2.5"/>
+            <text x="200" y="198" text-anchor="middle" font-size="22" font-weight="bold" fill="#0D47A1">
+              T (Timin)
+            </text>
+          </g>
+
+        </svg>
+      </div>
+
+      <!-- G ≡ C -->
+      <div class="canvas-wrap" style="padding:10px;">
+        <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+
+          <text x="200" y="25" text-anchor="middle" font-size="15" font-weight="bold" fill="#1A237E">
+            Pasangan G ≡ C (3 ikatan hidrogen)
+          </text>
+
+          <!-- Guanin (atas) -->
+          <g class="hoverable"
+             data-info="<b>Guanin (G)</b><br>Basa purina (cincin ganda).<br>Berpasangan dengan <b>Sitosin (C)</b> lewat <b>3 ikatan hidrogen</b>.<br>Pasangan G–C lebih kuat/kokoh dari A–T.">
+            <rect x="120" y="50" width="160" height="60" rx="8"
+                  fill="#A5D6A7" stroke="#37474F" stroke-width="2.5"/>
+            <text x="200" y="88" text-anchor="middle" font-size="22" font-weight="bold" fill="#1B5E20">
+              G (Guanin)
+            </text>
+          </g>
+
+          <!-- 3 ikatan hidrogen -->
+          <g class="hoverable pulse"
+             data-info="<b>3 Ikatan Hidrogen</b><br>Pasangan <b>Guanin–Sitosin</b> dihubungkan oleh 3 ikatan hidrogen.<br>Karena lebih banyak, pasangan G–C lebih <b>kuat</b> dibanding A–T. Itulah kenapa DNA dengan banyak G–C lebih stabil terhadap panas.">
+            <line x1="140" y1="115" x2="140" y2="155" stroke="#37474F" stroke-width="4"
+                  stroke-dasharray="6 4"/>
+            <line x1="200" y1="115" x2="200" y2="155" stroke="#37474F" stroke-width="4"
+                  stroke-dasharray="6 4"/>
+            <line x1="260" y1="115" x2="260" y2="155" stroke="#37474F" stroke-width="4"
+                  stroke-dasharray="6 4"/>
+            <circle cx="140" cy="135" r="9" fill="#FFF176" stroke="#37474F" stroke-width="1.5"/>
+            <text x="140" y="140" text-anchor="middle" font-size="11" font-weight="bold">H</text>
+            <circle cx="200" cy="135" r="9" fill="#FFF176" stroke="#37474F" stroke-width="1.5"/>
+            <text x="200" y="140" text-anchor="middle" font-size="11" font-weight="bold">H</text>
+            <circle cx="260" cy="135" r="9" fill="#FFF176" stroke="#37474F" stroke-width="1.5"/>
+            <text x="260" y="140" text-anchor="middle" font-size="11" font-weight="bold">H</text>
+          </g>
+
+          <!-- Sitosin (bawah) -->
+          <g class="hoverable"
+             data-info="<b>Sitosin (C)</b><br>Basa pirimidina (cincin tunggal).<br>Berpasangan dengan <b>Guanin (G)</b> lewat <b>3 ikatan hidrogen</b>.<br>Terdapat di DNA maupun RNA.">
+            <rect x="120" y="160" width="160" height="60" rx="8"
+                  fill="#FFCC80" stroke="#37474F" stroke-width="2.5"/>
+            <text x="200" y="198" text-anchor="middle" font-size="20" font-weight="bold" fill="#E65100">
+              C (Sitosin)
+            </text>
+          </g>
+
+        </svg>
+      </div>
+
+    </div>
+
+    <div id="info3" class="info-panel empty">💡 Hover/klik pasangan basa atau garis putus-putus untuk info ikatan hidrogen…</div>
+
+    <div style="font-size:13px; color:#546E7A; margin-top:12px; line-height:1.6;">
+      <b>Aturan penting:</b>
+      <br>🔗 <b>A–T</b> (DNA) / <b>A–U</b> (RNA) = <b>2 ikatan hidrogen</b>
+      <br>🔗 <b>G–C</b> = <b>3 ikatan hidrogen</b>
+      <br>🔗 Ikatan hidrogen <b>lemah</b> per ikatan, tapi jumlah yang banyak membuat DNA stabil. Mudah diputus oleh enzim helikase saat replikasi.
+    </div>
+  </div>
+
+</div>
+
+<!-- Tooltip -->
+<div id="tooltip"></div>
+
+<script>
+(function() {
+  const tooltip = document.getElementById('tooltip');
+  const hoverables = document.querySelectorAll('.hoverable');
+
+  // Tooltip saat hover
+  hoverables.forEach(el => {
+    el.addEventListener('mousemove', (e) => {
+      const info = el.getAttribute('data-info');
+      if (!info) return;
+      tooltip.innerHTML = info;
+      tooltip.classList.add('show');
+      // posisi tooltip mengikuti kursor, hindari keluar layar
+      let x = e.clientX + 15;
+      let y = e.clientY + 15;
+      const rect = tooltip.getBoundingClientRect();
+      if (x + rect.width > window.innerWidth) x = e.clientX - rect.width - 15;
+      if (y + rect.height > window.innerHeight) y = e.clientY - rect.height - 15;
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    });
+
+    el.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('show');
+    });
+
+    // Klik → tampilkan juga di panel bawah
+    el.addEventListener('click', () => {
+      const info = el.getAttribute('data-info');
+      if (!info) return;
+      // cari panel info terdekat
+      const card = el.closest('.card');
+      const panel = card.querySelector('.info-panel');
+      if (panel) {
+        panel.innerHTML = info;
+        panel.classList.remove('empty');
+      }
+    });
+  });
+
+  // Sembunyikan tooltip saat scroll
+  window.addEventListener('scroll', () => tooltip.classList.remove('show'));
+})();
+</script>
+
+</body>
+</html>
